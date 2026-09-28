@@ -417,17 +417,10 @@ class DriverGenerator(Generator):
                                _type_is_pair: bool) -> List[str]:
         return [f'TF_PSA_CRYPTO_PQCP_MLDSA_{key.kl}_ENABLED']
 
+
 class DispatchGenerator(DriverGenerator):
     """Test the driver dispatch layer."""
 
     @classmethod
     def function(cls, func: str, _kl: int) -> str:
         return func
-
-    def multipart_dependencies(self, key: Key,
-                               type_is_pair: bool) -> List[str]:
-        dependencies = super().multipart_dependencies(key, type_is_pair)
-        if type_is_pair:
-            dependencies.append('PSA_WANT_KEY_TYPE_ML_DSA_KEY_PAIR')
-
-        return dependencies
