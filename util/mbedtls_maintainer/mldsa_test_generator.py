@@ -359,7 +359,7 @@ class DriverGenerator(Generator):
             more_descr = ', ' + more_descr
         tc = test_case.TestCase()
         tc.set_function(self.function(function + '_multipart', key.kl))
-        tc.set_dependencies([f'TF_PSA_CRYPTO_PQCP_MLDSA_{key.kl}_ENABLED'])
+        tc.set_dependencies(self.multipart_dependencies(key, type_is_pair))
         if type_is_pair:
             key_bytes = key.private_representation(pkf_described[0])
         else:
@@ -413,9 +413,21 @@ class DriverGenerator(Generator):
             for kl in sorted(KEYS.keys()):
                 yield from self.gen_multipart(KEYS[kl][0])
 
+    def multipart_dependencies(self, key: Key,
+                               _type_is_pair: bool) -> List[str]:
+        return [f'TF_PSA_CRYPTO_PQCP_MLDSA_{key.kl}_ENABLED']
+
 class DispatchGenerator(DriverGenerator):
     """Test the driver dispatch layer."""
 
     @classmethod
     def function(cls, func: str, _kl: int) -> str:
         return func
+
+    def multipart_dependencies(self, key: Key,
+                               type_is_pair: bool) -> List[str]:
+        dependencies = super().multipart_dependencies(key, type_is_pair)
+        if type_is_pair:
+            dependencies.append('PSA_WANT_KEY_TYPE_ML_DSA_KEY_PAIR')
+
+        return dependencies
